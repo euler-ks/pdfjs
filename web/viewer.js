@@ -252,8 +252,21 @@ function getViewerConfiguration() {
 }
 
 function webViewerLoad() {
+
   var config = getViewerConfiguration();
   window.PDFViewerApplication = pdfjsWebApp.PDFViewerApplication;
+
+  try {
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isMobileParam = urlParams.get('isMobile');
+
+    window.PDFViewerApplication['isMobile'] = isMobileParam;
+
+  } catch (error) {
+
+  }
+  
   window.PDFViewerApplicationOptions = pdfjsWebAppOptions.AppOptions;
   var event = document.createEvent('CustomEvent');
   event.initCustomEvent('webviewerloaded', true, true, {});
@@ -373,6 +386,7 @@ var DefaultExternalServices = {
 };
 exports.DefaultExternalServices = DefaultExternalServices;
 var PDFViewerApplication = {
+  isMobile: false,
   initialBookmark: document.location.hash.substring(1),
   initialized: false,
   fellback: false,
@@ -1103,6 +1117,17 @@ var PDFViewerApplication = {
     downloadManager.onerror = function (err) {
       _this3.error("PDF failed to download: ".concat(err));
     };
+
+    if (this['isMobile'] && (this['isMobile'] === true || this['isMobile'] === 'true')) {
+
+      let href = url;
+      let link = document.createElement('a');
+      link.target = '_blank';
+      link.href = href;
+      link.click();
+
+      return;
+    }
 
     if (!this.pdfDocument || !this.downloadComplete) {
       downloadByUrl();
